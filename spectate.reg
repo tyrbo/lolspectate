@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\lsp]
+@="URL:LOL Spectator Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\lsp\DefaultIcon]
+@="C:\\Program Files (x86)\\LOL Summoners\\LOLSpectate\\LOLSpectate.exe,0"
+
+[HKEY_CLASSES_ROOT\lsp\shell]
+
+[HKEY_CLASSES_ROOT\lsp\shell\open]
+
+[HKEY_CLASSES_ROOT\lsp\shell\open\command]
+@="\"C:\\Program Files (x86)\\LOL Summoners\\LOLSpectate\\LOLSpectate.exe\" \"%1\""
+
