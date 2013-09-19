@@ -44,7 +44,7 @@ namespace LOLSpectate
                 {
                     Garena = false;
                 }
-                else if (File.Exists(Settings.Default.LeaguePath + @"\LoLLauncher.exe"))
+                else if (File.Exists(Settings.Default.LeaguePath + @"\lol.exe"))
                 {
                     Garena = true;
                 }
