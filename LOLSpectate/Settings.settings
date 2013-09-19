@@ -3,7 +3,16 @@
   <Profiles />
   <Settings>
     <Setting Name="LeaguePath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\Riot Games\League of Legends</Value>
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ResetPaths" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="HasReset" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="LastVersion" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1.0.0.0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
