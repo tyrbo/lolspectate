@@ -20,72 +20,72 @@ namespace LOLSpectate
         [STAThread]
         static void Main(string[] args)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
-            version = fvi.FileVersion;
+            try
+            {
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+                version = fvi.FileVersion;
 
-            if (Settings.Default.ResetPaths && Settings.Default.HasReset)
-            {
-                Settings.Default.LeaguePath = null;
-                Settings.Default.HasReset = false;
-                Settings.Default.Save();
-            }
+                checkForUpdates();
 
-            if (Settings.Default.LeaguePath == null || Settings.Default.LeaguePath == "")
-            {
-                MessageBox.Show("We can't find your League installation.\nYou'll need to show us where it is.", "Initial Setup", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                RequestPath();
-            }
-            else if (File.Exists(Settings.Default.LeaguePath + @"\lol.launcher.exe"))
-            {
-                Garena = false;
-            }
-            else if (File.Exists(Settings.Default.LeaguePath + @"\LoLLauncher.exe"))
-            {
-                Garena = true;
-            }
-            else
-            {
-                MessageBox.Show("We can't find your League installation.\nYou'll need to show us where it is.", "Initial Setup", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                RequestPath();
-            }
-
-            if (args.Length == 0 || didCancel)
-                Environment.Exit(0);
-
-            checkForUpdates();
-
-            if (Settings.Default.LastVersion != version)
-            {
-                Settings.Default.LastVersion = version;
-                Settings.Default.Save();
-                if (MessageBox.Show("LOL Spectate was recently updated. Would you like to view the release notes?", "LOL Spectate", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Yes)
+                if (Settings.Default.ResetPaths && Settings.Default.HasReset)
                 {
-                    Process.Start("https://github.com/tyrbo/lolspectate/wiki/Release-Notes");
+                    Settings.Default.LeaguePath = null;
+                    Settings.Default.HasReset = false;
+                    Settings.Default.Save();
                 }
-            }
 
-            argCopy = args;
-
-            string leaguePath = Settings.Default.LeaguePath;
-            string spectatorUrl = args[0].Replace("lsp://", "").Replace("%20", " ").TrimEnd('/');
-            string arguments = "\"8391\" \"\" \"\" \"" + spectatorUrl + "\"";
-
-            //MessageBox.Show(leaguePath + " " + spectatorUrl + " " + arguments);
-            
-            ProcessStartInfo start = new ProcessStartInfo();
-
-            if (!Garena)
-            {
-                DirectoryInfo di = new DirectoryInfo(leaguePath + @"\RADS\solutions\lol_game_client_sln\releases");
-                DirectoryInfo[] dirs = di.GetDirectories();
-
-                string folderName = "";
-                DateTime modifiedTime = new DateTime();
-
-                foreach (DirectoryInfo dir in dirs)
+                if (Settings.Default.LeaguePath == null || Settings.Default.LeaguePath == "")
                 {
-                    try
+                    MessageBox.Show("We can't find your League installation.\nYou'll need to show us where it is.", "Initial Setup", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    RequestPath();
+                }
+                else if (File.Exists(Settings.Default.LeaguePath + @"\lol.launcher.exe"))
+                {
+                    Garena = false;
+                }
+                else if (File.Exists(Settings.Default.LeaguePath + @"\LoLLauncher.exe"))
+                {
+                    Garena = true;
+                }
+                else
+                {
+                    MessageBox.Show("We can't find your League installation.\nYou'll need to show us where it is.", "Initial Setup", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    RequestPath();
+                }
+
+                if (args.Length == 0 || didCancel)
+                    Environment.Exit(0);
+
+                if (Settings.Default.LastVersion != version)
+                {
+                    Settings.Default.LastVersion = version;
+                    Settings.Default.Save();
+                    if (MessageBox.Show("LOL Spectate was recently updated. Would you like to view the release notes?", "LOL Spectate", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Yes)
+                    {
+                        Process.Start("https://github.com/tyrbo/lolspectate/wiki/Release-Notes");
+                    }
+                }
+
+                argCopy = args;
+
+                string leaguePath = Settings.Default.LeaguePath;
+                string spectatorUrl = args[0].Replace("lsp://", "").Replace("%20", " ").TrimEnd('/');
+                string arguments = "\"8391\" \"\" \"\" \"" + spectatorUrl + "\"";
+
+                //MessageBox.Show(leaguePath + " " + spectatorUrl + " " + arguments);
+
+                ProcessStartInfo start = new ProcessStartInfo();
+
+                if (!Garena)
+                {
+                    DirectoryInfo di = new DirectoryInfo(leaguePath + @"\RADS\solutions\lol_game_client_sln\releases");
+                    DirectoryInfo[] dirs = di.GetDirectories();
+
+                    string folderName = "";
+                    DateTime modifiedTime = new DateTime();
+
+                    foreach (DirectoryInfo dir in dirs)
                     {
                         if (dir.LastWriteTime > modifiedTime)
                         {
@@ -93,19 +93,24 @@ namespace LOLSpectate
                             folderName = dir.Name;
                         }
                     }
-                    catch { }
+                    start.Arguments = arguments;
+                    start.WorkingDirectory = leaguePath + @"\RADS\solutions\lol_game_client_sln\releases\" + folderName + @"\deploy\";
+                    start.FileName = start.WorkingDirectory + @"League of Legends.exe";
                 }
-
-                
+                else
+                {
+                    start.Arguments = arguments;
+                    start.WorkingDirectory = leaguePath + @"\Game\";
+                    start.FileName = start.WorkingDirectory + @"League of Legends.exe";
+                }
+                Process p = new Process();
+                p = Process.Start(start);
             }
-            else
+            catch (Exception e)
             {
-                start.Arguments = arguments;
-                start.WorkingDirectory = leaguePath + @"\GameData\Apps\LoL\Game\";
-                start.FileName = start.WorkingDirectory + @"League of Legends.exe";
+                string msg = "Something went wrong!\nScreenshot this message box, and email the screenshot to jon@lolsummoners.com.\n\n" + e.ToString();
+                MessageBox.Show(msg, "We Crashed!", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
             }
-            Process p = new Process();
-            p = Process.Start(start);
         }
 
         static void checkForUpdates()
@@ -166,10 +171,10 @@ namespace LOLSpectate
                 openFileDialog1.ShowNewFolderButton = false;
                 openFileDialog1.Description = "Please select the path to your League installation. e.g.\n" +
                     @"C:\Riot Games\League of Legends" + "\n" +
-                    @"C:\Program Files (x86)\GarenaLoL for Garena)";
+                    @"C:\Program Files (x86)\GarenaLoL\GameData\Apps\LoL";
                 if (openFileDialog1.ShowDialog(new Form() { TopMost = true, TopLevel = true }) == DialogResult.OK)
                 {
-                    if (File.Exists(openFileDialog1.SelectedPath + @"\lol.launcher.exe") || File.Exists(openFileDialog1.SelectedPath + @"\LoLLauncher.exe"))
+                    if (File.Exists(openFileDialog1.SelectedPath + @"\lol.launcher.exe") || File.Exists(openFileDialog1.SelectedPath + @"\lol.exe"))
                     {
                         Settings.Default.LeaguePath = openFileDialog1.SelectedPath;
                         Settings.Default.Save();
@@ -177,7 +182,7 @@ namespace LOLSpectate
                     }
                     else
                     {
-                        MessageBox.Show("Unable to locate \"lol.launcher.exe\". Please try again.", "Can't Find League", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        MessageBox.Show("Unable to locate League of Legends. Please try again.", "Can't Find League", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
                 else

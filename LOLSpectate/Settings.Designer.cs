@@ -46,7 +46,7 @@ namespace LOLSpectate {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool HasReset {
             get {
                 return ((bool)(this["HasReset"]));
